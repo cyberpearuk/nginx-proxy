@@ -275,6 +275,8 @@ server {
 	include /etc/nginx/network_internal.conf;
 	{{ end }}
 
+	include /etc/nginx/extra.conf;
+
 	{{ template "ssl_policy" (dict "ssl_policy" $ssl_policy) }}
 
 	ssl_session_timeout 5m;
@@ -346,6 +348,8 @@ server {
 	# Only allow traffic from internal clients
 	include /etc/nginx/network_internal.conf;
 	{{ end }}
+
+	include /etc/nginx/extra.conf;
 
 	{{ if (exists (printf "/etc/nginx/vhost.d/%s" $host)) }}
 	include {{ printf "/etc/nginx/vhost.d/%s" $host }};
