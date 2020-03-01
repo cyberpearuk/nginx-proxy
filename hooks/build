@@ -1,0 +1,4 @@
+#!/bin/bash
+
+#printenv
+docker build -t $IMAGE_NAME --build-arg VERSION=$DOCKER_TAG .
