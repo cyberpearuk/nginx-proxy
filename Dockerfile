@@ -4,4 +4,4 @@ ARG VERSION
 ENV VERSION $VERSION
 
 ADD nginx.tmpl /app/nginx.tmpl
-ADD extra.conf /etc/nginx/extra.conf
+ADD extra.conf /etc/nginx/conf.d/
