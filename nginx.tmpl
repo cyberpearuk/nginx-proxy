@@ -205,6 +205,8 @@ upstream {{ $upstream_name }} {
 {{/* Get the VIRTUAL_PROTO defined by containers w/ the same vhost, falling back to "http" */}}
 {{ $proto := trim (or (first (groupByKeys $containers "Env.VIRTUAL_PROTO")) "http") }}
 
+{{ $proxy_cache := trim (or (first (groupByKeys $containers "Env.PROXY_CACHE")) "false") }}
+
 {{/* Get the NETWORK_ACCESS defined by containers w/ the same vhost, falling back to "external" */}}
 {{ $network_tag := or (first (groupByKeys $containers "Env.NETWORK_ACCESS")) "external" }}
 
@@ -273,6 +275,13 @@ server {
 	{{ if eq $network_tag "internal" }}
 	# Only allow traffic from internal clients
 	include /etc/nginx/network_internal.conf;
+	{{ end }}
+
+	{{ if eq $proxy_cache "true" }}
+	# Container has proxy caching enabled - PROXY_CACHE={{ (printf $proxy_cache) }}
+	include /etc/nginx/optional.d/proxy-cache.conf;
+	{{ else }}
+	# Container does not have proxy caching enabled - PROXY_CACHE={{ (printf $proxy_cache) }}
 	{{ end }}
 
 	{{ template "ssl_policy" (dict "ssl_policy" $ssl_policy) }}
@@ -347,6 +356,12 @@ server {
 	include /etc/nginx/network_internal.conf;
 	{{ end }}
 
+	{{ if eq $proxy_cache "true" }}
+	# Container has proxy caching enabled - PROXY_CACHE={{ (printf $proxy_cache) }}
+	include /etc/nginx/optional.d/proxy-cache.conf;
+	{{ else }}
+	# Container does not have proxy caching enabled - PROXY_CACHE={{ (printf $proxy_cache) }}
+	{{ end }}
 
 	{{ if (exists (printf "/etc/nginx/vhost.d/%s" $host)) }}
 	include {{ printf "/etc/nginx/vhost.d/%s" $host }};
