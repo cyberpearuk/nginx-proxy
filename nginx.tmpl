@@ -272,6 +272,9 @@ server {
 	{{ end }}
 	access_log /var/log/nginx/access.log vhost;
 
+        # Include extra server level config
+	include /etc/nginx/extra.d/server.conf;
+
 	{{ if eq $network_tag "internal" }}
 	# Only allow traffic from internal clients
 	include /etc/nginx/network_internal.conf;
@@ -350,6 +353,9 @@ server {
 	listen [::]:80 {{ $default_server }};
 	{{ end }}
 	access_log /var/log/nginx/access.log vhost;
+
+        # Include extra server level config
+	include /etc/nginx/extra.d/server.conf;
 
 	{{ if eq $network_tag "internal" }}
 	# Only allow traffic from internal clients
