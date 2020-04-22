@@ -1,8 +1,9 @@
-FROM jwilder/nginx-proxy
+FROM jwilder/nginx-proxy:latest
 
 RUN apt-get update && apt-get install -y apt-utils autoconf automake build-essential git libcurl4-openssl-dev libgeoip-dev liblmdb-dev libpcre++-dev libtool libxml2-dev libyajl-dev pkgconf wget zlib1g-dev
 
-RUN git clone --recursive --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity \
+ENV NGINX_MODSEC_VERSION=v3/master
+RUN git clone --recursive --depth 1 -b ${NGINX_MODSEC_VERSION} --single-branch https://github.com/SpiderLabs/ModSecurity \
   && cd ModSecurity \
   && git submodule init \
   && git submodule update \
@@ -12,7 +13,6 @@ RUN git clone --recursive --depth 1 -b v3/master --single-branch https://github.
   && make install
 RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git
 
-ENV NGINX_VERSION=1.17.5
 RUN wget http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz \
     && tar zxvf nginx-${NGINX_VERSION}.tar.gz \
     && cd nginx-${NGINX_VERSION} \
@@ -32,13 +32,23 @@ RUN mkdir /etc/nginx/modsec \
 # Workaround for issue https://github.com/SpiderLabs/ModSecurity/issues/1941
 RUN cp ./ModSecurity/unicode.mapping /etc/nginx/modsec/unicode.mapping
 
-ENV OWASP_RULES_VERSION=3.0.2
+ENV OWASP_RULES_VERSION=v3.0/master
 # Install OWASP Rules
+#RUN git clone --recursive --depth 1 -b ${OWASP_RULES_VERSION} --single-branch https://github.com/SpiderLabs/owasp-modsecurity-crs \
+    #&& wget https://github.com/SpiderLabs/owasp-modsecurity-crs/archive/v${OWASP_RULES_VERSION}.tar.gz \
+    #&& tar -xzvf v${OWASP_RULES_VERSION}.tar.gz \
+    #&& mv owasp-modsecurity-crs-${OWASP_RULES_VERSION} /usr/local/owasp-modsecurity-crs \
+
+ENV OWASP_RULES_VERSION=3.0.2
 RUN wget https://github.com/SpiderLabs/owasp-modsecurity-crs/archive/v${OWASP_RULES_VERSION}.tar.gz \
     && tar -xzvf v${OWASP_RULES_VERSION}.tar.gz \
     && mv owasp-modsecurity-crs-${OWASP_RULES_VERSION} /usr/local/owasp-modsecurity-crs \
     && cd /usr/local/owasp-modsecurity-crs \
     && cp crs-setup.conf.example crs-setup.conf
+
+
+# Configure Traditional Mode - https://www.modsecurity.org/CRS/Documentation/anomaly.html
+RUN sed -i 's/SecDefaultAction "phase:2,log,auditlog,pass"/SecDefaultAction "phase:2,deny,status:403,log"/' /usr/local/owasp-modsecurity-crs/crs-setup.conf
 
 ARG VERSION
 ENV VERSION $VERSION
@@ -49,3 +59,5 @@ ADD modsec/* /etc/nginx/modsec/
 ADD optional.d/* /etc/nginx/optional.d/
 ADD extra.d/* /etc/nginx/extra.d/
 ADD conf.d/* /etc/nginx/conf.d/
+
+RUN nginx -t
