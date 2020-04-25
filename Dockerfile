@@ -48,7 +48,9 @@ RUN wget https://github.com/SpiderLabs/owasp-modsecurity-crs/archive/v${OWASP_RU
 
 
 # Configure Traditional Mode - https://www.modsecurity.org/CRS/Documentation/anomaly.html
-RUN sed -i 's/SecDefaultAction "phase:2,log,auditlog,pass"/SecDefaultAction "phase:2,deny,status:403,log"/' /usr/local/owasp-modsecurity-crs/crs-setup.conf
+RUN sed -i 's/SecDefaultAction "phase:2,log,auditlog,pass"/SecDefaultAction "phase:2,deny,status:403,log"/' /usr/local/owasp-modsecurity-crs/crs-setup.conf \
+    && echo "SecPcreMatchLimit 150000" >>  /usr/local/owasp-modsecurity-crs/crs-setup.conf \
+    && echo "SecPcreMatchLimitRecursion 150000" >>  /usr/local/owasp-modsecurity-crs/crs-setup.conf
 
 ARG VERSION
 ENV VERSION $VERSION
