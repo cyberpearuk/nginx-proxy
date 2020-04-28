@@ -27,7 +27,8 @@ RUN sed -i -e 's/user  nginx;/load_module modules\/ngx_http_modsecurity_module.s
 RUN mkdir /etc/nginx/modsec \
     && wget -P /etc/nginx/modsec/ https://raw.githubusercontent.com/SpiderLabs/ModSecurity/v3/master/modsecurity.conf-recommended \
     && mv /etc/nginx/modsec/modsecurity.conf-recommended /etc/nginx/modsec/modsecurity.conf \
-    && sed -i 's/SecRuleEngine DetectionOnly/SecRuleEngine On/' /etc/nginx/modsec/modsecurity.conf
+    && sed -i 's/SecRuleEngine DetectionOnly/SecRuleEngine On/' /etc/nginx/modsec/modsecurity.conf \
+    && sed -i 's/SecRuleEngine Reject/SecRequestBodyLimitAction ProcessPartial/' /etc/nginx/modsec/modsecurity.conf
 
 # Workaround for issue https://github.com/SpiderLabs/ModSecurity/issues/1941
 RUN cp ./ModSecurity/unicode.mapping /etc/nginx/modsec/unicode.mapping
@@ -49,6 +50,7 @@ RUN wget https://github.com/SpiderLabs/owasp-modsecurity-crs/archive/v${OWASP_RU
 
 # Configure Traditional Mode - https://www.modsecurity.org/CRS/Documentation/anomaly.html
 RUN sed -i 's/SecDefaultAction "phase:2,log,auditlog,pass"/SecDefaultAction "phase:2,deny,status:403,log"/' /usr/local/owasp-modsecurity-crs/crs-setup.conf \
+    && echo "SecRequestBodyLimit 67108864" >>  /usr/local/owasp-modsecurity-crs/crs-setup.conf \
     && echo "SecPcreMatchLimit 150000" >>  /usr/local/owasp-modsecurity-crs/crs-setup.conf \
     && echo "SecPcreMatchLimitRecursion 150000" >>  /usr/local/owasp-modsecurity-crs/crs-setup.conf
 
