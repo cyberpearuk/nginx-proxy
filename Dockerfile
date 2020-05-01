@@ -57,6 +57,9 @@ RUN sed -i 's/SecDefaultAction "phase:2,log,auditlog,pass"/SecDefaultAction "pha
 ARG VERSION
 ENV VERSION $VERSION
 
+# Persist cache
+VOLUME /var/cache/nginx
+
 ADD nginx.tmpl /app/nginx.tmpl
 
 ADD modsec/* /etc/nginx/modsec/
