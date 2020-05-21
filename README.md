@@ -19,3 +19,8 @@ Proxy caching excludes the following:
  - Requests with GitLab session coookie, Java Session Cookie (JSESSIONID), Nexus Session Cookie (NXSESSIONID)
  - Requests with Pragma or "CacheControl: no-cache" headers set
 
+
+
+## Maintainer
+
+This repository is maintained by [Black Pear Digital](https://www.blackpeardigital.co.uk).
