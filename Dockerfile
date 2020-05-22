@@ -33,13 +33,6 @@ RUN mkdir /etc/nginx/modsec \
 # Workaround for issue https://github.com/SpiderLabs/ModSecurity/issues/1941
 RUN cp ./ModSecurity/unicode.mapping /etc/nginx/modsec/unicode.mapping
 
-ENV OWASP_RULES_VERSION=v3.0/master
-# Install OWASP Rules
-#RUN git clone --recursive --depth 1 -b ${OWASP_RULES_VERSION} --single-branch https://github.com/SpiderLabs/owasp-modsecurity-crs \
-    #&& wget https://github.com/SpiderLabs/owasp-modsecurity-crs/archive/v${OWASP_RULES_VERSION}.tar.gz \
-    #&& tar -xzvf v${OWASP_RULES_VERSION}.tar.gz \
-    #&& mv owasp-modsecurity-crs-${OWASP_RULES_VERSION} /usr/local/owasp-modsecurity-crs \
-
 ENV OWASP_RULES_VERSION=3.0.2
 RUN wget https://github.com/SpiderLabs/owasp-modsecurity-crs/archive/v${OWASP_RULES_VERSION}.tar.gz \
     && tar -xzvf v${OWASP_RULES_VERSION}.tar.gz \
