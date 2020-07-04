@@ -1,38 +1,41 @@
-FROM jwilder/nginx-proxy:latest
+FROM nginx:1.17.8
 
-RUN apt-get update && apt-get install -y apt-utils \
-    autoconf automake build-essential \
-    git libcurl4-openssl-dev \
-    libgeoip-dev liblmdb-dev libpcre++-dev libtool libxml2-dev libyajl-dev pkgconf \
-    wget zlib1g-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Install wget and install/updates certificates
+RUN apt-get update \
+ && apt-get install -y -q --no-install-recommends \
+    ca-certificates \
+    wget \
+ && apt-get clean \
+ && rm -r /var/lib/apt/lists/*
 
-ENV NGINX_MODSEC_VERSION=v3/master
-RUN git clone --recursive --depth 1 -b ${NGINX_MODSEC_VERSION} --single-branch https://github.com/SpiderLabs/ModSecurity \
-  && cd ModSecurity \
-  && git submodule init \
-  && git submodule update \
-  && ./build.sh \
-  && ./configure \
-  && make \
-  && make install \
-  && cp ./unicode.mapping /tmp/unicode.mapping \
-  && cd .. && rm -rf ModSecurity
+ARG DOCKER_GEN_VERSION=0.7.4
+# Configure Nginx and apply fix for very long server names
+RUN echo "daemon off;" >> /etc/nginx/nginx.conf \
+    && sed -i 's/worker_processes  1/worker_processes  auto/' /etc/nginx/nginx.conf \
+    # Install Forego
+    && wget -O /usr/local/bin/forego https://github.com/jwilder/forego/releases/download/v0.16.1/forego \
+    && chmod u+x /usr/local/bin/forego \
+    # Install docker-gen
+    && wget https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz \
+    && tar -C /usr/local/bin -xvzf docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz \
+    && rm /docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz
 
+COPY network_internal.conf /etc/nginx/
 
-RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git \
-    # Remove .git directory
-    && wget http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz \
-    && tar zxvf nginx-${NGINX_VERSION}.tar.gz \
-    && rm nginx-${NGINX_VERSION}.tar.gz \
-    && cd nginx-${NGINX_VERSION} \
-    && ./configure --with-compat --add-dynamic-module=../ModSecurity-nginx \
-    && make modules \
-    && cp objs/ngx_http_modsecurity_module.so /etc/nginx/modules \
-    && cd .. && rm -rf nginx-${NGINX_VERSION} && rm -rf ModSecurity-nginx
+WORKDIR /app/
 
-# Enable module
-RUN sed -i -e 's/user  nginx;/load_module modules\/ngx_http_modsecurity_module.so;\nuser  nginx;/' /etc/nginx/nginx.conf
+ENV DOCKER_HOST unix:///tmp/docker.sock
+
+VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam"]
+
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
+CMD ["forego", "start", "-r"]
+
+COPY usr/bin/* /usr/bin/
+
+ARG NGINX_MODSEC_VERSION=v3/master
+RUN install-modsec
+ADD app /app
 
 # Install rules
 RUN mkdir /etc/nginx/modsec \
@@ -43,6 +46,7 @@ RUN mkdir /etc/nginx/modsec \
     # Workaround for issue https://github.com/SpiderLabs/ModSecurity/issues/1941
     && mv /tmp/unicode.mapping /etc/nginx/modsec/unicode.mapping
 
+# Install OWASP Rules
 ARG OWASP_RULES_VERSION=3.0.2
 RUN wget https://github.com/SpiderLabs/owasp-modsecurity-crs/archive/v${OWASP_RULES_VERSION}.tar.gz \
     && tar -xzvf v${OWASP_RULES_VERSION}.tar.gz \
@@ -63,8 +67,6 @@ ENV VERSION $VERSION
 
 # Persist cache
 VOLUME /var/cache/nginx
-
-ADD nginx.tmpl /app/nginx.tmpl
 
 ADD modsec/* /etc/nginx/modsec/
 ADD optional.d/* /etc/nginx/optional.d/
