@@ -68,9 +68,9 @@ ENV VERSION $VERSION
 # Persist cache
 VOLUME /var/cache/nginx
 
-ADD modsec/* /etc/nginx/modsec/
-ADD optional.d/* /etc/nginx/optional.d/
-ADD extra.d/* /etc/nginx/extra.d/
-ADD conf.d/* /etc/nginx/conf.d/
+ADD nginx/conf.d/* /etc/nginx/conf.d/
+ADD nginx/extra.d/* /etc/nginx/extra.d/
+ADD nginx/modsec/* /etc/nginx/modsec/
+ADD nginx/optional.d/* /etc/nginx/optional.d/
 
 RUN nginx -t
