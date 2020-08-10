@@ -69,7 +69,7 @@ ENV VERSION $VERSION
 VOLUME /var/cache/nginx
 
 ADD nginx/conf.d/* /etc/nginx/conf.d/
-ADD nginx/extra.d/* /etc/nginx/extra.d/
+ADD nginx/server.d/* /etc/nginx/server.d/
 ADD nginx/modsec/* /etc/nginx/modsec/
 ADD nginx/optional.d/* /etc/nginx/optional.d/
 
