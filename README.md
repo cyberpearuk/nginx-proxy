@@ -2,6 +2,10 @@
 
 Nginx proxy docker image which extends jwilder/nginx-proxy
 
+## Docker Gen
+
+Docker-gen can now be disabled by setting 'DISABLE_DOCKER_GEN' environment variable to 'true'. 
+
 ## Proxy Caching
 
 ### Enabling 
