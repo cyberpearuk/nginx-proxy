@@ -13,6 +13,7 @@ if [ "x$RESOLVERS" = "x" ]; then
     unset RESOLVERS
 fi
 
+rm -f Procfile
 # Allow docker-gen to be disabled
 if [[ ${DISABLE_DOCKER_GEN} != "true"  ]]; then
 	# Warn if the DOCKER_HOST socket does not exist
