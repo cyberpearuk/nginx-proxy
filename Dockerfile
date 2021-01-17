@@ -42,20 +42,20 @@ RUN mkdir /etc/nginx/modsec \
     && mv /tmp/unicode.mapping /etc/nginx/modsec/unicode.mapping
 
 # Install OWASP Rules
-ARG OWASP_RULES_VERSION=3.0.2
-RUN wget https://github.com/SpiderLabs/owasp-modsecurity-crs/archive/v${OWASP_RULES_VERSION}.tar.gz \
+ARG OWASP_RULES_VERSION=3.3.0
+RUN wget https://github.com/coreruleset/coreruleset/archive/v${OWASP_RULES_VERSION}.tar.gz \
     && tar -xzvf v${OWASP_RULES_VERSION}.tar.gz \
     && rm v${OWASP_RULES_VERSION}.tar.gz \
-    && mv owasp-modsecurity-crs-${OWASP_RULES_VERSION} /usr/local/owasp-modsecurity-crs \
-    && cd /usr/local/owasp-modsecurity-crs \
+    && mv coreruleset-${OWASP_RULES_VERSION} /usr/local/coreruleset \
+    && cd /usr/local/coreruleset \
     && cp crs-setup.conf.example crs-setup.conf
 
 
 # Configure Traditional Mode - https://www.modsecurity.org/CRS/Documentation/anomaly.html
-RUN sed -i 's/SecDefaultAction "phase:2,log,auditlog,pass"/SecDefaultAction "phase:2,deny,status:403,log"/' /usr/local/owasp-modsecurity-crs/crs-setup.conf \
-    && echo "SecRequestBodyLimit 67108864" >>  /usr/local/owasp-modsecurity-crs/crs-setup.conf \
-    && echo "SecPcreMatchLimit 150000" >>  /usr/local/owasp-modsecurity-crs/crs-setup.conf \
-    && echo "SecPcreMatchLimitRecursion 150000" >>  /usr/local/owasp-modsecurity-crs/crs-setup.conf
+RUN sed -i 's/SecDefaultAction "phase:2,log,auditlog,pass"/SecDefaultAction "phase:2,deny,status:403,log"/' /usr/local/coreruleset/crs-setup.conf \
+    && echo "SecRequestBodyLimit 67108864" >>  /usr/local/coreruleset/crs-setup.conf \
+    && echo "SecPcreMatchLimit 150000" >>  /usr/local/coreruleset/crs-setup.conf \
+    && echo "SecPcreMatchLimitRecursion 150000" >>  /usr/local/coreruleset/crs-setup.conf
 
 # Set image version
 ARG VERSION
