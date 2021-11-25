@@ -2,14 +2,15 @@
 
 set -e
 
-
+NAMESPACE=$(basename $(dirname $(pwd)))
 NAME=$(basename `pwd`)
-IMAGE_NAME=$(basename $(dirname $(pwd)))/$(basename $(pwd))
-DOCKER_TAG=latest
+DOCKER_TAG=development
+
+IMAGE_NAME=${NAMESPACE}/${NAME}:${DOCKER_TAG}
 
 # Local machine build
 build() {
-    source ./hooks/build
+    docker build -t $IMAGE_NAME --build-arg VERSION=$DOCKER_TAG --target=nginx-base .
 }
 
 run() {
@@ -17,11 +18,8 @@ run() {
 }
 
 push() {
-    DEV_IMAGE=${IMAGE_NAME}:development
-    echo "Creating development tag from latest"
-    docker tag ${IMAGE_NAME}:${DOCKER_TAG} ${DEV_IMAGE}
-    echo "Pushing development tag" 
-    docker push ${DEV_IMAGE}
+    echo "Pushing tag ${IMAGE_NAME}" 
+    docker push ${IMAGE_NAME}
 }
 
 case $1 in
