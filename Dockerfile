@@ -79,7 +79,7 @@ COPY --from=fetch-bins /usr/local/bin/forego /usr/local/bin/forego
 
 ENV DOCKER_HOST unix:///tmp/docker.sock
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["forego", "start", "-r"]
+CMD ["/app/start.sh"]
 ADD app /app
 WORKDIR /app/
 
