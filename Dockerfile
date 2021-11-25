@@ -17,7 +17,7 @@ RUN wget -O /usr/local/bin/forego https://github.com/jwilder/forego/releases/dow
     && tar -C /usr/local/bin -xvzf docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz \
     && rm /docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz
 
-FROM nginx:1.17.8
+FROM nginx:1.19.10 as nginx-base
 
 RUN apt-get update \
  && apt-get install -y -q --no-install-recommends \
@@ -29,20 +29,11 @@ RUN apt-get update \
 
 COPY usr/bin/* /usr/bin/
 
-ARG NGINX_MODSEC_VERSION=v3/master
+ARG NGINX_MODSEC_VERSION=v3.0.4
 RUN install-modsec
 
-# Install rules
-RUN mkdir /etc/nginx/modsec \
-    && wget -P /etc/nginx/modsec/ https://raw.githubusercontent.com/SpiderLabs/ModSecurity/v3/master/modsecurity.conf-recommended \
-    && mv /etc/nginx/modsec/modsecurity.conf-recommended /etc/nginx/modsec/modsecurity.conf \
-    && sed -i 's/SecRuleEngine DetectionOnly/SecRuleEngine On/' /etc/nginx/modsec/modsecurity.conf \
-    && sed -i 's/SecRuleEngine Reject/SecRequestBodyLimitAction ProcessPartial/' /etc/nginx/modsec/modsecurity.conf \
-    # Workaround for issue https://github.com/SpiderLabs/ModSecurity/issues/1941
-    && mv /tmp/unicode.mapping /etc/nginx/modsec/unicode.mapping
-
 # Install OWASP Rules
-ARG OWASP_RULES_VERSION=3.3.0
+ARG OWASP_RULES_VERSION=3.3.1-rc1
 RUN wget https://github.com/coreruleset/coreruleset/archive/v${OWASP_RULES_VERSION}.tar.gz \
     && tar -xzvf v${OWASP_RULES_VERSION}.tar.gz \
     && rm v${OWASP_RULES_VERSION}.tar.gz \
