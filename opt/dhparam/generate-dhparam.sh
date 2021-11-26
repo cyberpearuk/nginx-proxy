@@ -1,12 +1,21 @@
 #!/bin/bash -e
 
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+
 # The first argument is the bit depth of the dhparam, or 4096 if unspecified
 DHPARAM_BITS=${1:-4096}
 GENERATE_DHPARAM=${2:-true}
 
 # If a dhparam file is not available, use the pre-generated one and generate a new one in the background.
 # Note that /etc/nginx/dhparam is a volume, so this dhparam will persist restarts.
-PREGEN_DHPARAM_FILE="/var/lib/dhparam/dhparam.pem.default"
+PREGEN_DHPARAM_FILE="${DIR}/dhparam.pem.default"
 DHPARAM_FILE="/etc/nginx/dhparam/dhparam.pem"
 GEN_LOCKFILE="/tmp/dhparam_generating.lock"
 

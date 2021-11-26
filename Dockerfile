@@ -26,8 +26,7 @@ RUN apt-get update \
  && apt-get clean \
  && rm -r /var/lib/apt/lists/*
 
-
-COPY usr/bin/* /usr/bin/
+COPY /usr/bin/install-modsec /usr/bin/
 
 ARG NGINX_MODSEC_VERSION=v3.0.4
 RUN install-modsec
@@ -52,8 +51,6 @@ RUN sed -i 's/SecDefaultAction "phase:2,log,auditlog,pass"/SecDefaultAction "pha
 ARG VERSION
 ENV VERSION $VERSION
 
-# Persist cache data
-VOLUME /var/cache/nginx
 
 # Add configuration files
 # TODO: The conf.d volume can get mounted, better to use an alternative 
@@ -68,25 +65,31 @@ RUN echo "daemon off;" >> /etc/nginx/nginx.conf \
 
 COPY network_internal.conf /etc/nginx/
 
+# Copy utilities
+COPY /opt/dhparam /opt/dhparam
+RUN ln -s /opt/dhparam/generate-dhparam.sh /usr/bin/generate-dhparam 
 
+# Copy entrypoint
+COPY /usr/bin/docker-entrypoint  /usr/bin/docker-entrypoint
+ENTRYPOINT ["/usr/bin/docker-entrypoint"]
 
-VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam"]
+RUN nginx -t
+
+# Create image with docker-gen and foregot
+FROM nginx-base as production
+
+ADD app /app
+WORKDIR /app/
+
+VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam", "/var/cache/nginx"]
+
+# Add start script
+COPY /usr/bin/start /usr/bin/
 
 # Add docker-gen
 COPY --from=fetch-bins /usr/bin/docker-gen /usr/bin/docker-gen
 # Add forego (for running docker-gen and nginx together)
 COPY --from=fetch-bins /usr/bin/forego /usr/bin/forego
-# Copy utility scripts
-COPY /usr/bin/* /usr/bin/
-# Copy data files
-COPY /var/lib/* /var/lib/
-
 
 ENV DOCKER_HOST unix:///tmp/docker.sock
-ENTRYPOINT ["/usr/bin/docker-entrypoint"]
 CMD ["/usr/bin/start"]
-ADD app /app
-WORKDIR /app/
-
-
-RUN nginx -t

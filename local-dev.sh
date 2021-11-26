@@ -6,11 +6,14 @@ NAMESPACE=$(basename $(dirname $(pwd)))
 NAME=$(basename `pwd`)
 DOCKER_TAG=development
 
-IMAGE_NAME=${NAMESPACE}/${NAME}:${DOCKER_TAG}
+IMAGE_NAME=${NAMESPACE}/${NAME}
 
 # Local machine build
 build() {
-    docker build -t $IMAGE_NAME --build-arg VERSION=$DOCKER_TAG --target=nginx-base .
+    # Build image with everything
+    docker build -t $IMAGE_NAME:docker-gen  --build-arg VERSION=$DOCKER_TAG --target=production .
+    # Build image with just Nginx and config
+    docker build -t $IMAGE_NAME:development --build-arg VERSION=$DOCKER_TAG --target=nginx-base .
 }
 
 run() {
@@ -18,8 +21,9 @@ run() {
 }
 
 push() {
-    echo "Pushing tag ${IMAGE_NAME}" 
-    docker push ${IMAGE_NAME}
+    # Only pushes development tag
+    echo "Pushing tag ${IMAGE_NAME}":development 
+    docker push ${IMAGE_NAME}:development 
 }
 
 case $1 in
