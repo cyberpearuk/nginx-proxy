@@ -17,7 +17,7 @@ RUN wget -O /usr/bin/forego https://github.com/jwilder/forego/releases/download/
     && tar -C /usr/bin -xvzf docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz \
     && rm /docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz
 
-FROM nginx:1.19.10 as nginx-base
+FROM nginx:1.20.2 as nginx-base
 
 RUN apt-get update \
  && apt-get install -y -q --no-install-recommends \
@@ -28,11 +28,11 @@ RUN apt-get update \
 
 COPY /usr/bin/install-modsec /usr/bin/
 
-ARG NGINX_MODSEC_VERSION=v3.0.4
+ARG NGINX_MODSEC_VERSION=v3.0.6
 RUN install-modsec
 
 # Install OWASP Rules
-ARG OWASP_RULES_VERSION=3.3.1-rc1
+ARG OWASP_RULES_VERSION=3.3.2
 RUN wget https://github.com/coreruleset/coreruleset/archive/v${OWASP_RULES_VERSION}.tar.gz \
     && tar -xzvf v${OWASP_RULES_VERSION}.tar.gz \
     && rm v${OWASP_RULES_VERSION}.tar.gz \
