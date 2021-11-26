@@ -8,7 +8,7 @@ RUN apt-get update \
  && apt-get clean \
  && rm -r /var/lib/apt/lists/*
 
-ARG DOCKER_GEN_VERSION=0.7.4
+ARG DOCKER_GEN_VERSION=0.8.0
 # Install Forego
 RUN wget -O /usr/bin/forego https://github.com/jwilder/forego/releases/download/v0.16.1/forego \
     && chmod u+x /usr/bin/forego \
