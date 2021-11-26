@@ -10,11 +10,11 @@ RUN apt-get update \
 
 ARG DOCKER_GEN_VERSION=0.7.4
 # Install Forego
-RUN wget -O /usr/local/bin/forego https://github.com/jwilder/forego/releases/download/v0.16.1/forego \
-    && chmod u+x /usr/local/bin/forego \
+RUN wget -O /usr/bin/forego https://github.com/jwilder/forego/releases/download/v0.16.1/forego \
+    && chmod u+x /usr/bin/forego \
     # Install docker-gen
     && wget https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz \
-    && tar -C /usr/local/bin -xvzf docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz \
+    && tar -C /usr/bin -xvzf docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz \
     && rm /docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz
 
 FROM nginx:1.19.10 as nginx-base
@@ -73,13 +73,18 @@ COPY network_internal.conf /etc/nginx/
 VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam"]
 
 # Add docker-gen
-COPY --from=fetch-bins /usr/local/bin/docker-gen /usr/local/bin/docker-gen
+COPY --from=fetch-bins /usr/bin/docker-gen /usr/bin/docker-gen
 # Add forego (for running docker-gen and nginx together)
-COPY --from=fetch-bins /usr/local/bin/forego /usr/local/bin/forego
+COPY --from=fetch-bins /usr/bin/forego /usr/bin/forego
+# Copy utility scripts
+COPY /usr/bin/* /usr/bin/
+# Copy data files
+COPY /var/lib/* /var/lib/
+
 
 ENV DOCKER_HOST unix:///tmp/docker.sock
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["/app/start.sh"]
+ENTRYPOINT ["/usr/bin/docker-entrypoint"]
+CMD ["/usr/bin/start"]
 ADD app /app
 WORKDIR /app/
 
