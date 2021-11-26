@@ -60,10 +60,14 @@ ADD nginx/modsec/* /etc/nginx/modsec/
 ADD nginx/optional.d/* /etc/nginx/optional.d/
 
 # Configure Nginx and apply fix for very long server names
-RUN echo "daemon off;" >> /etc/nginx/nginx.conf \
-    && sed -i 's/worker_processes  1/worker_processes  auto/' /etc/nginx/nginx.conf
+RUN sed -i 's/worker_processes  1/worker_processes  auto/' /etc/nginx/nginx.conf
 
 COPY network_internal.conf /etc/nginx/
+
+RUN nginx -t
+
+# Create image with docker-gen and foregot
+FROM nginx-base as production
 
 # Copy utilities
 COPY /opt/dhparam /opt/dhparam
@@ -73,10 +77,7 @@ RUN ln -s /opt/dhparam/generate-dhparam.sh /usr/bin/generate-dhparam
 COPY /usr/bin/docker-entrypoint  /usr/bin/docker-entrypoint
 ENTRYPOINT ["/usr/bin/docker-entrypoint"]
 
-RUN nginx -t
-
-# Create image with docker-gen and foregot
-FROM nginx-base as production
+RUN echo "daemon off;" >> /etc/nginx/nginx.conf
 
 ADD app /app
 WORKDIR /app/
