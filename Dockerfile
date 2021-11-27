@@ -64,6 +64,8 @@ RUN sed -i 's/worker_processes  1/worker_processes  auto/' /etc/nginx/nginx.conf
 
 COPY network_internal.conf /etc/nginx/
 
+VOLUME ["/var/cache/nginx"]
+
 RUN nginx -t
 
 # Create image with docker-gen and foregot
