@@ -41,7 +41,7 @@ jobs:
 
 
       - name: Extract metadata (tags, labels) for nginx only image
-        id: meta
+        id: nginx-base-meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
           images: ${{ github.repository }}
@@ -54,5 +54,5 @@ jobs:
           context: .
           push: true
           target: nginx-base
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.nginx-base-meta.outputs.tags }}
+          labels: ${{ steps.nginx-base-meta.outputs.labels }}
