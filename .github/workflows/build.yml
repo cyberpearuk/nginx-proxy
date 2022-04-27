@@ -24,7 +24,7 @@ jobs:
       
       - name: Extract metadata (tags, labels) for main image
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@e1a45f6e54773201956dae54cd74ee7fdcafe877
         with:
           images: ${{ github.repository }}
           tags: |
@@ -42,7 +42,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for nginx only image
         id: nginx-base-meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@e1a45f6e54773201956dae54cd74ee7fdcafe877
         with:
           images: ${{ github.repository }}
           tags: 
