@@ -17,7 +17,7 @@ RUN wget -O /usr/bin/forego https://github.com/jwilder/forego/releases/download/
     && tar -C /usr/bin -xvzf docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz \
     && rm /docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz
 
-FROM nginx:1.20.2 as nginx-base
+FROM nginx:1.21.6 as nginx-base
 
 RUN apt-get update \
  && apt-get install -y -q --no-install-recommends \
