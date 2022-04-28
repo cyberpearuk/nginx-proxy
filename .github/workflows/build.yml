@@ -28,7 +28,7 @@ jobs:
         with:
           images: cyberpearuk/nginx-proxy
           tags: |
-            type=semver,event=tag,pattern={{version}}
+            type=raw,event=tag,value=${{ env.TAG }}
             type=raw,event=branch,value=latest,enable={{is_default_branch}}
       - name: Build and push main image
         uses: docker/build-push-action@v2
@@ -46,7 +46,7 @@ jobs:
         with:
           images: cyberpearuk/nginx
           tags: 
-            type=semver,event=tag,pattern={{version}}
+            type=raw,event=tag,value=${{ env.TAG }}
             type=raw,event=branch,value=latest,enable={{is_default_branch}}
       - name: Build and push nginx only image
         uses: docker/build-push-action@v2
